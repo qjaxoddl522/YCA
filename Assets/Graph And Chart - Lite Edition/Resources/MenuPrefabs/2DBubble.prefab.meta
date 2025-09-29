@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ccec992ff7a1eef44a5bd480b833b160
+timeCreated: 1492604022
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 148497
+  packageName: Graph and Chart - Lite Edition - Data Visualization
+  packageVersion: 1.14.0
+  assetPath: Assets/Graph And Chart - Lite Edition/Resources/MenuPrefabs/2DBubble.prefab
+  uploadId: 775184

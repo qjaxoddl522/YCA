@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fa0b3a0e33fedd249b4527b6027ba69e
+timeCreated: 1480865726
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 148497
+  packageName: Graph and Chart - Lite Edition - Data Visualization
+  packageVersion: 1.14.0
+  assetPath: Assets/Graph And Chart - Lite Edition/Themes/Common/Materials/graphChart/point.mat
+  uploadId: 775184

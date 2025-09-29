@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b8cd67dc7d6afda47814ba739d5695e5
+timeCreated: 1560614129
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 148497
+  packageName: Graph and Chart - Lite Edition - Data Visualization
+  packageVersion: 1.14.0
+  assetPath: Assets/Graph And Chart - Lite Edition/Prefabs/Text/WhiteText45.prefab
+  uploadId: 775184
