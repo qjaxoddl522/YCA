@@ -5,6 +5,8 @@ using UnityEngine.UI;
 public class SearchInputField : MonoBehaviour
 {
     [SerializeField] Button searchButton;
+    [SerializeField] Canvas loadingCanvas;
+    [SerializeField] GameObject loadingPrefab;
     TMP_InputField input;
 
     void Awake()
@@ -17,5 +19,7 @@ public class SearchInputField : MonoBehaviour
     void OnSubmit(string text)
     {
         Debug.Log($"검색: {text}");
+        Instantiate(loadingPrefab, loadingCanvas.transform);
+        DontDestroyOnLoad(loadingCanvas);
     }
 }
