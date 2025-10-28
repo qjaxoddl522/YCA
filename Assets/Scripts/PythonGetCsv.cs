@@ -3,6 +3,9 @@ using System.IO;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
+/// <summary>
+/// 현재 미사용
+/// </summary>
 public class PythonGetCsv : MonoBehaviour
 {
     // A안: 시스템 파이썬
