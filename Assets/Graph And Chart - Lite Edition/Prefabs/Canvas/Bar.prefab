@@ -128,7 +128,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68eb8a9ffb98caa4ba2dfcd1198e3c4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GrowMultiplier: 1.1
+  GrowMultiplier: 1
   VerticalOnly: 0
   HorizontalOnly: 0
   TimeScale: 2
