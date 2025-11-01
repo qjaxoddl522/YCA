@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,6 +16,9 @@ public class YoutubeScrollViewController : MonoBehaviour
     [Tooltip("비디오 아이템 프리팹 (YoutubeVideoItem 컴포넌트 포함)")]
     public GameObject videoItemPrefab;
 
+    [Tooltip("프리팹에 전달할 ContentController")]
+    public ChartContentController contentController;
+
     [Header("설정")]
     [Tooltip("시작 시 자동으로 로드")]
     public bool loadOnStart = true;
@@ -27,8 +30,8 @@ public class YoutubeScrollViewController : MonoBehaviour
     [Tooltip("로딩 표시 오브젝트 (선택사항)")]
     public GameObject loadingIndicator;
 
-    private List<YoutubeVideoData> currentVideos = new List<YoutubeVideoData>();
-    private List<GameObject> instantiatedItems = new List<GameObject>();
+    private List<YoutubeVideoData> currentVideos = new();
+    private List<YoutubeVideoItem> instantiatedItems = new();
 
     private void Start()
     {
@@ -111,18 +114,17 @@ public class YoutubeScrollViewController : MonoBehaviour
         GameObject itemObj = Instantiate(videoItemPrefab, contentParent);
         itemObj.name = $"VideoItem_{index}";
 
-        // YoutubeVideoItem 컴포넌트 가져오기
         YoutubeVideoItem videoItem = itemObj.GetComponent<YoutubeVideoItem>();
         if (videoItem != null)
         {
-            videoItem.SetVideoData(videoData, index);
+            videoItem.SetVideoData(contentController, videoData, index);
         }
         else
         {
             Debug.LogWarning($"VideoItem 프리팹에 YoutubeVideoItem 컴포넌트가 없습니다.");
         }
 
-        instantiatedItems.Add(itemObj);
+        instantiatedItems.Add(videoItem);
     }
 
     /// <summary>
@@ -130,10 +132,10 @@ public class YoutubeScrollViewController : MonoBehaviour
     /// </summary>
     public void ClearVideoItems()
     {
-        foreach (GameObject item in instantiatedItems)
+        foreach (YoutubeVideoItem item in instantiatedItems)
         {
             if (item != null)
-                Destroy(item);
+                Destroy(item.gameObject);
         }
         instantiatedItems.Clear();
     }
@@ -164,7 +166,7 @@ public class YoutubeScrollViewController : MonoBehaviour
     }
 
     /// <summary>
-    /// 현재 로드된 비디오 수를 반환합니다
+    /// 현재 로드된 비디오 수를 반환
     /// </summary>
     public int GetVideoCount()
     {
