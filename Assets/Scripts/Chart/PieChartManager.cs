@@ -21,15 +21,15 @@ public class PieChartManager : MonoBehaviour
 
     void Start()
     {
-        if (pieChart != null)
-        {
-            AddCategory("Category A", 32);
-            AddCategory("Category B", 21);
-            AddCategory("Category C", 54);
-        }
+        //if (pieChart != null)
+        //{
+        //    AddCategory("Category A", 32);
+        //    AddCategory("Category B", 21);
+        //    AddCategory("Category C", 54);
+        //}
     }
 
-    void AddCategory(string name, double amount)
+    public void AddCategory(string name, double amount)
     {
         // 랜덤 색상 생성
         Color randomColor = Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);

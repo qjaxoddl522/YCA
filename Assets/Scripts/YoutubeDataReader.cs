@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -38,7 +38,7 @@ public static class YoutubeDataReader
         List<YoutubeVideoData> videoList = new List<YoutubeVideoData>();
         HashSet<string> processedLinks = new HashSet<string>(); // 중복 제거용
 
-        string filePath = Path.Combine(Application.dataPath, "Data", csvFileName);
+        string filePath = Path.Combine(Application.persistentDataPath, csvFileName);
 
         if (!File.Exists(filePath))
         {

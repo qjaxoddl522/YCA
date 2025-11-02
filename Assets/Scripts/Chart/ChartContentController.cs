@@ -27,7 +27,7 @@ public class ChartContentController : MonoBehaviour
     }
     
     public void ShowVideoSelectedContent(Sprite thumbnail, string title)
-    {   
+    {
         if (overallKeywordContentObject != null)
             overallKeywordContentObject.SetActive(false);
         
@@ -55,7 +55,32 @@ public class ChartContentController : MonoBehaviour
             titleText.text = title;
         }
 
+        var result = CsvReader.ReadLinkResultCsv();
+
+        var pie = videoSelectedContent?.GetComponent<PieChartManager>();
+        if (pie != null)
+        {
+            foreach (var keyword in result.keywordNumbers.Keys)
+            {
+                pie.AddCategory(keyword, result.keywordNumbers[keyword]);
+            }
+        }
+        else
+        {
+            Debug.LogError("PieChartManager를 찾을 수 없습니다!");
+        }
+
         var bar = videoSelectedContent?.GetComponent<PositiveBarChartManager>();
+        if (bar != null)
+        {
+            bar.SetCategoryValue("긍정", result.stanceNumbers[Stance.Positive]);
+            bar.SetCategoryValue("부정", result.stanceNumbers[Stance.Negative]);
+            bar.SetCategoryValue("중립", result.stanceNumbers[Stance.Neutral]);
+        }
+        else
+        {
+            Debug.LogError("PositiveBarChartManager를 찾을 수 없습니다!");
+        }
     }
 }
 
