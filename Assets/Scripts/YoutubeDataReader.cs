@@ -136,11 +136,11 @@ public static class YoutubeDataReader
     }
 
     /// <summary>
-    /// 기본 CSV 파일("youtube_keyword_results 인기순.csv")을 읽어옵니다
+    /// 기본 CSV 파일("youtube_keyword_results.csv")을 읽어옵니다
     /// </summary>
     public static List<YoutubeVideoData> ReadDefaultCSV()
     {
-        return ReadCSV("youtube_keyword_results 인기순.csv");
+        return ReadCSV("youtube_keyword_results.csv");
     }
 
     /// <summary>

@@ -61,7 +61,7 @@ WORD_RE = re.compile(r"[A-Za-z0-9가-힣_]+")
 
 def write_wordfreq_csv(text, out_path):
     words = WORD_RE.findall(text or "")
-    # 대소문자 구분 없애려면 .lower() 적용
+    
     normalized = [w.lower() for w in words]
     counter = Counter(normalized)
 

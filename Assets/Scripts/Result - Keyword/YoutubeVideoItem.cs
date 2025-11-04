@@ -202,13 +202,10 @@ public class YoutubeVideoItem : MonoBehaviour
         // 현재 아이템 선택
         currentSelectedItem = this;
 
-        Sprite sprite = thumbnailImage.sprite;
-        string titleText = title.text;
-
         itemButtonImage.color = selectedColor;
         selectArea.SetActive(true);
 
-        contentController.ShowVideoSelectedContent(sprite, titleText);
+        contentController.ShowVideoSelectedContent(title.text);
     }
 
     public void SetDeselected()

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using ChartAndGraph;
 
-public class PositiveBarChartManager : MonoBehaviour
+public class StanseBarChartManager : MonoBehaviour
 {
     [SerializeField] CanvasBarChart barChart;
     VerticalAxis verticalAxis;

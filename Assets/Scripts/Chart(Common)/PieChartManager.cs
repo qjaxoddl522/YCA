@@ -21,12 +21,13 @@ public class PieChartManager : MonoBehaviour
 
     void Start()
     {
-        //if (pieChart != null)
-        //{
-        //    AddCategory("Category A", 32);
-        //    AddCategory("Category B", 21);
-        //    AddCategory("Category C", 54);
-        //}
+        if (pieChart != null)
+        {
+            ClearAllCategories();
+            AddCategory("Category A", 32);
+            AddCategory("Category B", 21);
+            AddCategory("Category C", 54);
+        }
     }
 
     public void AddCategory(string name, double amount)
@@ -74,6 +75,21 @@ public class PieChartManager : MonoBehaviour
         {
             category.UnhighlightCategory();
         });
+    }
+
+    public void ClearAllCategories()
+    {
+        // PieChart의 모든 카테고리 제거
+        pieChart.DataSource.Clear();
+        
+        // UI 카테고리 오브젝트 모두 제거
+        foreach (Transform child in pieChartCategories.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        
+        // 내부 데이터 초기화
+        categories.Clear();
     }
 
     /// <summary>

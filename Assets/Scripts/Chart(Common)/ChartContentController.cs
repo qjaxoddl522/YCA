@@ -12,7 +12,6 @@ public class ChartContentController : MonoBehaviour
     [SerializeField] private GameObject videoSelectedContent;
 
     [Header("썸네일, 제목")]
-    [SerializeField] private Image thumbnailImage;
     [SerializeField] private TMP_Text titleText;
 
     public void ShowOverallKeywordContent()
@@ -26,40 +25,22 @@ public class ChartContentController : MonoBehaviour
         var pie = overallKeywordContentObject?.GetComponent<PieChartManager>();
     }
     
-    public void ShowVideoSelectedContent(Sprite thumbnail, string title)
+    public void ShowVideoSelectedContent(string title)
     {
         if (overallKeywordContentObject != null)
             overallKeywordContentObject.SetActive(false);
         
         if (videoSelectedContent != null)
             videoSelectedContent.SetActive(true);
-
-        // null 체크
-        if (thumbnailImage == null)
-        {
-            Debug.LogError("❌ NRE 원인: thumbnailImage가 null입니다!");
-            Debug.LogError("→ ChartContentController Inspector에서 thumbnailImage를 할당하세요.");
-        }
-        else
-        {
-            thumbnailImage.sprite = thumbnail;
-        }
         
-        if (titleText == null)
-        {
-            Debug.LogError("❌ NRE 원인: titleText가 null입니다!");
-            Debug.LogError("→ ChartContentController Inspector에서 titleText를 할당하세요.");
-        }
-        else
-        {
-            titleText.text = title;
-        }
+        titleText.text = title;
 
         var result = CsvReader.ReadLinkResultCsv();
 
         var pie = videoSelectedContent?.GetComponent<PieChartManager>();
         if (pie != null)
         {
+            pie.ClearAllCategories();
             foreach (var keyword in result.keywordNumbers.Keys)
             {
                 pie.AddCategory(keyword, result.keywordNumbers[keyword]);
@@ -70,7 +51,7 @@ public class ChartContentController : MonoBehaviour
             Debug.LogError("PieChartManager를 찾을 수 없습니다!");
         }
 
-        var bar = videoSelectedContent?.GetComponent<PositiveBarChartManager>();
+        var bar = videoSelectedContent?.GetComponent<StanseBarChartManager>();
         if (bar != null)
         {
             bar.SetCategoryValue("긍정", result.stanceNumbers[Stance.Positive]);
