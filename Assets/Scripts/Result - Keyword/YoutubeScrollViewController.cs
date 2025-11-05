@@ -55,11 +55,8 @@ public class YoutubeScrollViewController : MonoBehaviour
         if (loadingIndicator != null)
             loadingIndicator.SetActive(true);
 
-        // 기존 아이템 제거
         ClearVideoItems();
-
-        // CSV에서 데이터 로드
-        currentVideos = YoutubeDataReader.ReadDefaultCSV();
+        currentVideos = CsvDataReader.ReadYoutubeVideoDataCSV();
 
         if (currentVideos == null || currentVideos.Count == 0)
         {

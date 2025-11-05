@@ -35,7 +35,7 @@ public class ChartContentController : MonoBehaviour
         
         titleText.text = title;
 
-        var result = CsvReader.ReadLinkResultCsv();
+        var result = CsvDataReader.ReadLinkResultCsv();
 
         var pie = videoSelectedContent?.GetComponent<PieChartManager>();
         if (pie != null)

@@ -13,7 +13,7 @@ namespace ChartAndGraph
         const int MenuItemPriority = 0;
         private static void InstanciateCanvas(string path)
         {
-            Canvas[] canvases = GameObject.FindObjectsOfType<Canvas>();
+            Canvas[] canvases = GameObject.FindObjectsByType<Canvas>(FindObjectsSortMode.None);
             if (canvases == null || canvases.Length == 0)
             {
                 EditorUtility.DisplayDialog("No canvas in scene", "Please add a canvas to the scene and try again", "Ok");
@@ -44,7 +44,7 @@ namespace ChartAndGraph
         [MenuItem(MenuItemBase + "Clear All",priority = MenuItemPriority)]
         public static void ClearChartGarbage()
         {            
-            ChartItem[] children = GameObject.FindObjectsOfType<ChartItem>();
+            ChartItem[] children = GameObject.FindObjectsByType<ChartItem>(FindObjectsSortMode.None);
             for (int i = 0; i < children.Length; ++i)
             {
                 if (children[i] != null)

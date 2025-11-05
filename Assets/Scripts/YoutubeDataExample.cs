@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -31,10 +31,10 @@ public class YoutubeDataExample : MonoBehaviour
         Debug.Log("YouTube 데이터 로드 시작...");
         
         // CSV 파일에서 데이터 읽기
-        loadedVideos = YoutubeDataReader.ReadDefaultCSV();
+        loadedVideos = CsvDataReader.ReadYoutubeVideoDataCSV();
 
         // 데이터 출력 (디버깅용)
-        YoutubeDataReader.PrintVideoData(loadedVideos);
+        CsvDataReader.PrintVideoData(loadedVideos);
 
         // 로드된 데이터로 뭔가 하기
         DisplayVideoInfo();
