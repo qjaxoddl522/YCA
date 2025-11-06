@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Text.RegularExpressions;
 
 public class SearchInputField : MonoBehaviour
 {
@@ -18,8 +19,58 @@ public class SearchInputField : MonoBehaviour
 
     void OnSubmit(string text)
     {
-        Debug.Log($"검색: {text}");
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            Debug.LogWarning("검색어가 비어있습니다.");
+            return;
+        }
+
+        text = text.Trim();
+
+        // 링크인지 확인
+        if (IsYouTubeLink(text))
+        {
+            OnLinkSearch(text);
+        }
+        else
+        {
+            OnKeywordSearch(text);
+        }
+    }
+
+    /// <summary>
+    /// YouTube 링크인지 확인
+    /// </summary>
+    bool IsYouTubeLink(string text)
+    {
+        // YouTube URL 패턴: youtube.com/watch?v= 또는 youtu.be/
+        string pattern = @"(?:youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})";
+        return Regex.IsMatch(text, pattern);
+    }
+
+    /// <summary>
+    /// 링크 검색 처리
+    /// </summary>
+    void OnLinkSearch(string link)
+    {
+        Debug.Log($"링크로 검색 시작: {link}");
         Instantiate(loadingPrefab, loadingCanvas.transform);
         DontDestroyOnLoad(loadingCanvas);
+        
+        // TODO: Python 스크립트 실행 (--url 파라미터 사용)
+        // 예: YoutubeCollector.exe --url "{link}"
+    }
+
+    /// <summary>
+    /// 키워드 검색 처리
+    /// </summary>
+    void OnKeywordSearch(string keyword)
+    {
+        Debug.Log($"키워드로 검색 시작: {keyword}");
+        Instantiate(loadingPrefab, loadingCanvas.transform);
+        DontDestroyOnLoad(loadingCanvas);
+        
+        // TODO: Python 스크립트 실행 (--text 파라미터 사용)
+        // 예: YoutubeCollector.exe --text "{keyword}" --period_type "month" --amount 1
     }
 }

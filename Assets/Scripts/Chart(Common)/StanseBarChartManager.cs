@@ -45,14 +45,10 @@ public class StanseBarChartManager : MonoBehaviour
         barChart.ClearVerticalCustomDivisions();
 
         // 10개 단위로 간격 늘리기
-        int interval = Mathf.CeilToInt(maxValue / 10f);
+        int interval = Mathf.Max(1, Mathf.CeilToInt(maxValue / 10f));
         verticalAxis.MainDivisions.Total = 0;
-        verticalAxis.MainDivisions.Messure = ChartDivisionInfo.DivisionMessure.TotalDivisions;
-
-        for (int i = 0; i <= maxValue; i += interval)
-        {
-            barChart.AddVerticalAxisDivision(i);
-        }
+        verticalAxis.MainDivisions.Messure = ChartDivisionInfo.DivisionMessure.DataUnits;
+        verticalAxis.MainDivisions.UnitsPerDivision = interval;
 
         // 정수만 표시
         verticalAxis.MainDivisions.FractionDigits = 0;

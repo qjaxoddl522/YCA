@@ -20,6 +20,26 @@ public class PieChartManager : MonoBehaviour
     }
     
     Dictionary<string, CategoryInfo> categories = new Dictionary<string, CategoryInfo>();
+    
+    // 파스텔톤 색상을 위한 기준 Hue 값 (0~1 사이)
+    private float baseHue = -1f;  // -1은 아직 초기화 안 됨을 의미
+    
+    [Header("파스텔톤 색상 설정")]
+    [SerializeField]
+    [Tooltip("각 카테고리마다 Hue 증가량 (0~1 사이, 권장: 0.09)")]
+    private float hueIncrement = 0.09f;
+    
+    [SerializeField]
+    [Tooltip("파스텔톤 채도 (0~1 사이, 낮을수록 파스텔, 권장: 0.4)")]
+    [Range(0f, 1f)]
+    private float saturation = 0.4f;
+    
+    [SerializeField]
+    [Tooltip("파스텔톤 명도 (0~1 사이, 높을수록 밝음, 권장: 0.95)")]
+    [Range(0f, 1f)]
+    private float brightness = 0.95f;
+    
+    private int categoryCount = 0;  // 추가된 카테고리 개수
 
     void Start()
     {
@@ -37,11 +57,24 @@ public class PieChartManager : MonoBehaviour
 
     public void AddCategory(string name, double amount, bool addUIToTop = false)
     {
-        // 랜덤 색상 생성
-        Color randomColor = Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
+        // 첫 번째 카테고리일 경우 랜덤하게 기준 Hue 선택
+        if (baseHue < 0f)
+        {
+            baseHue = Random.Range(0f, 1f);
+        }
+        
+        // 파스텔톤 색상 생성 (낮은 채도, 높은 명도)
+        float currentHue = (baseHue + (categoryCount * hueIncrement)) % 1.0f;  // 1.0을 넘으면 다시 0으로
+        Color pastelColor = Color.HSVToRGB(
+            currentHue,      // Hue: 기준 색상에서 hueIncrement씩 증가
+            saturation,      // Saturation: 낮은 채도로 파스텔톤
+            brightness       // Value: 높은 명도로 밝은 톤
+        );
+        
+        categoryCount++;
         
         // 같은 색상의 Material 동적 생성
-        Material newMaterial = CreateMaterialWithColor(randomColor);
+        Material newMaterial = CreateMaterialWithColor(pastelColor);
         
         // UI 카테고리 생성 (텍스트)
         var categoryObj = Instantiate(pieChartCategoryPrefab, pieChartCategories.transform);
@@ -58,13 +91,13 @@ public class PieChartManager : MonoBehaviour
         {
             name = name,
             amount = amount,
-            color = randomColor,
+            color = pastelColor,
             categoryComponent = category
         };
         categories[name] = info;
         
         // 임시로 0% 설정 (UpdateAllPercentages에서 재계산됨)
-        category.SetCategory(name, randomColor, 0f);
+        category.SetCategory(name, pastelColor, 0f);
 
         // PieChart에 카테고리 추가 (같은 색상의 Material 사용)
         pieChart.DataSource.AddCategory(name, newMaterial);
@@ -101,6 +134,10 @@ public class PieChartManager : MonoBehaviour
         
         // 내부 데이터 초기화
         categories.Clear();
+        
+        // 색상 초기화 (다음에 AddCategory 호출 시 새로운 랜덤 baseHue 선택)
+        baseHue = -1f;
+        categoryCount = 0;
     }
 
     /// <summary>

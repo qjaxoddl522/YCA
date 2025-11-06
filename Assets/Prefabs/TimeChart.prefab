@@ -180,8 +180,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -500,7 +500,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 683c1c28d013cce4c9128c952dbdca81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textPrefab: {fileID: 114000014259531626, guid: 25ea031bfc10c7342ab5bcb344090e13, type: 3}
+  textPrefab: {fileID: 114000014259531626, guid: 68948a5a024a9554389929d60ee952ea, type: 3}
   textFormat:
     prefix: 
     suffix: 
@@ -535,7 +535,7 @@ MonoBehaviour:
     messure: 0
     unitsPerDivision: 1
     total: 5
-    material: {fileID: 0}
+    material: {fileID: 2100000, guid: 0290bf08b7a37a14f88e4829b1339ab7, type: 2}
     materialTiling:
       EnableTiling: 0
       TileFactor: 100
@@ -549,7 +549,7 @@ MonoBehaviour:
       Automatic: 1
       Value: 0.5
     markThickness: 3
-    textPrefab: {fileID: 114000014259531626, guid: 25ea031bfc10c7342ab5bcb344090e13, type: 3}
+    textPrefab: {fileID: 114000014259531626, guid: 68948a5a024a9554389929d60ee952ea, type: 3}
     textPrefix: 
     textSuffix: "\uAC1C"
     fractionDigits: 0
@@ -576,7 +576,7 @@ MonoBehaviour:
       Automatic: 1
       Value: 0.5
     markThickness: 3
-    textPrefab: {fileID: 114000014259531626, guid: 25ea031bfc10c7342ab5bcb344090e13, type: 3}
+    textPrefab: {fileID: 114000014259531626, guid: 68948a5a024a9554389929d60ee952ea, type: 3}
     textPrefix: 
     textSuffix: "\uAC1C"
     fractionDigits: 0
@@ -597,7 +597,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53bfaf390f2349b4894f21c310d420b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TextPrefab: {fileID: 114000014259531626, guid: 25ea031bfc10c7342ab5bcb344090e13, type: 3}
+  TextPrefab: {fileID: 114000014259531626, guid: 68948a5a024a9554389929d60ee952ea, type: 3}
   FontSize: 20
   TextOffset: {x: -20, y: 0, z: 0}
 --- !u!1 &5550065908769976487

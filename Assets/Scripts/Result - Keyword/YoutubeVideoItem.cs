@@ -64,10 +64,10 @@ public class YoutubeVideoItem : MonoBehaviour
         if (videoData == null)
             return;
 
-        // 제목 설정
+        // 제목 설정 (폰트 미지원 문자 제거)
         if (title != null)
         {
-            title.text = videoData.title;
+            title.text = CsvDataReader.RemoveUnsupportedCharacters(videoData.title);
         }
 
         // 조회수 설정

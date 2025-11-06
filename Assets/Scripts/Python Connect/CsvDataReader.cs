@@ -85,6 +85,11 @@ public class LinkResult
 
 public static class CsvDataReader
 {
+    /// <summary>
+    /// 제목 최대 길이 (이 값을 초과하면 "..."으로 생략됨)
+    /// </summary>
+    public static int MaxTitleLength = 50;
+
     public static LinkResult ReadLinkResultCsv()
     {
         var path = Path.Combine(Application.persistentDataPath, "analyzed_comments.csv");
@@ -202,8 +207,28 @@ public static class CsvDataReader
         {
             using (StreamReader reader = new StreamReader(filePath))
             {
-                // 헤더 라인 건너뛰기
+                // 헤더 라인 읽기
                 string headerLine = reader.ReadLine();
+                if (string.IsNullOrWhiteSpace(headerLine))
+                {
+                    Debug.LogError("CSV 헤더가 비어있습니다.");
+                    return videoList;
+                }
+
+                // 헤더에서 컬럼 인덱스 찾기
+                string[] headers = ParseCSVLine(headerLine);
+                int titleIdx = Array.IndexOf(headers, "video_title");
+                int linkIdx = Array.IndexOf(headers, "video_link");
+                int viewsIdx = Array.IndexOf(headers, "views");
+                int thumbnailIdx = Array.IndexOf(headers, "thumbnail");
+
+                if (titleIdx < 0 || linkIdx < 0 || viewsIdx < 0 || thumbnailIdx < 0)
+                {
+                    Debug.LogError($"필수 컬럼을 찾을 수 없습니다. video_title: {titleIdx}, video_link: {linkIdx}, views: {viewsIdx}, thumbnail: {thumbnailIdx}");
+                    return videoList;
+                }
+
+                Debug.Log($"컬럼 인덱스 - 제목: {titleIdx}, 링크: {linkIdx}, 조회수: {viewsIdx}, 썸네일: {thumbnailIdx}");
 
                 while (!reader.EndOfStream)
                 {
@@ -214,12 +239,16 @@ public static class CsvDataReader
                     // CSV 파싱 (콤마로 구분, 단 따옴표 안의 콤마는 무시)
                     string[] values = ParseCSVLine(line);
 
-                    if (values.Length >= 4)
+                    if (values.Length > Mathf.Max(titleIdx, linkIdx, viewsIdx, thumbnailIdx))
                     {
-                        string videoTitle = values[0];
-                        string videoLink = values[1];
-                        string viewsStr = values[2];
-                        string thumbnailUrl = values[3];
+                        string videoTitle = titleIdx < values.Length ? values[titleIdx] : "";
+                        string videoLink = linkIdx < values.Length ? values[linkIdx] : "";
+                        string viewsStr = viewsIdx < values.Length ? values[viewsIdx] : "0";
+                        string thumbnailUrl = thumbnailIdx < values.Length ? values[thumbnailIdx] : "";
+
+                        // 제목에서 폰트 미지원 문자 제거 및 길이 제한
+                        videoTitle = RemoveUnsupportedCharacters(videoTitle);
+                        videoTitle = TruncateTitle(videoTitle, MaxTitleLength);
 
                         // 중복된 링크는 건너뛰기 (같은 비디오가 여러 댓글과 함께 반복됨)
                         if (processedLinks.Contains(videoLink))
@@ -251,6 +280,95 @@ public static class CsvDataReader
         }
 
         return videoList;
+    }
+
+    /// <summary>
+    /// 이모지 및 폰트 미지원 문자를 제거합니다
+    /// </summary>
+    public static string RemoveUnsupportedCharacters(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return text;
+
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        
+        for (int i = 0; i < text.Length; i++)
+        {
+            char c = text[i];
+            
+            // 서로게이트 페어(2바이트 문자) 처리
+            if (char.IsHighSurrogate(c) && i + 1 < text.Length)
+            {
+                int codePoint = char.ConvertToUtf32(text, i);
+                
+                // 이모지 범위 확인하여 제거
+                if ((codePoint >= 0x1F300 && codePoint <= 0x1F9FF) ||  // 이모지
+                    (codePoint >= 0x1FA00 && codePoint <= 0x1FAFF) ||  // 추가 이모지
+                    (codePoint >= 0x2600 && codePoint <= 0x26FF) ||    // 기타 심볼
+                    (codePoint >= 0x2700 && codePoint <= 0x27BF) ||    // 딩뱃
+                    (codePoint >= 0x1F600 && codePoint <= 0x1F64F))    // 얼굴 이모지
+                {
+                    i++; // 서로게이트 페어의 두 번째 문자 건너뛰기
+                    continue;
+                }
+                else
+                {
+                    // 이모지가 아니면 포함
+                    sb.Append(c);
+                    i++;
+                    if (i < text.Length)
+                        sb.Append(text[i]);
+                }
+            }
+            else
+            {
+                int charCode = (int)c;
+                
+                // 한글 자모 범위 제거 (폰트에서 지원 안 함)
+                // U+1100~U+11FF: 한글 자모 (초성, 중성, 종성)
+                // U+3130~U+318F: 한글 호환 자모
+                if ((charCode >= 0x1100 && charCode <= 0x11FF) ||
+                    (charCode >= 0x3130 && charCode <= 0x318F))
+                {
+                    continue; // 건너뛰기
+                }
+                
+                // 기타 특수 심볼 제거
+                if ((charCode >= 0x2190 && charCode <= 0x21FF) ||  // 화살표
+                    (charCode >= 0x2200 && charCode <= 0x22FF) ||  // 수학 기호
+                    (charCode >= 0x25A0 && charCode <= 0x25FF))    // 도형
+                {
+                    continue; // 건너뛰기
+                }
+                
+                // 제어 문자 제거 (탭, 줄바꿈 제외)
+                if (char.IsControl(c) && c != '\t' && c != '\n' && c != '\r')
+                {
+                    continue;
+                }
+                
+                // 정상 문자는 추가
+                sb.Append(c);
+            }
+        }
+        
+        return sb.ToString().Trim();
+    }
+
+    /// <summary>
+    /// 제목을 지정된 길이로 제한합니다 (초과 시 "..."으로 생략)
+    /// </summary>
+    public static string TruncateTitle(string title, int maxLength = 50)
+    {
+        if (string.IsNullOrEmpty(title))
+            return title;
+
+        title = title.Trim();
+        
+        if (title.Length <= maxLength)
+            return title;
+
+        return title.Substring(0, maxLength) + "...";
     }
 
     /// <summary>

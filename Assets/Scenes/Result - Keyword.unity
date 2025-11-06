@@ -174,6 +174,10 @@ MonoBehaviour:
   pieChartCategories: {fileID: 1562976486}
   pieChartCategoryPrefab: {fileID: 8188109508092053462, guid: f776e2e558a7ef746966bc1233335be1, type: 3}
   baseMaterial: {fileID: 0}
+  periodText: {fileID: 0}
+  hueIncrement: 0.09
+  saturation: 0.4
+  brightness: 0.95
 --- !u!222 &50701134
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -345,15 +349,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 0.94509804, g: 0.94509804, b: 0.94509804, a: 0.5882353}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 0}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -520,7 +524,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   meshSegements: 20
-  startAngle: 0
+  startAngle: 90
   angleSpan: 360
   spacingAngle: 0
   radius: 250
@@ -531,7 +535,7 @@ MonoBehaviour:
     mGroups:
     - Pie
     mData: []
-  clockWise: 0
+  clockWise: 1
   prefab: {fileID: 114000011816695716, guid: 174751ce50250cf4291f5c015fd4be43, type: 3}
   lineThickness: 1
   lineSpacing: 20
@@ -675,6 +679,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 252864059}
   m_CullTransparentMesh: 1
+--- !u!1 &254940893
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 254940894}
+  - component: {fileID: 254940896}
+  - component: {fileID: 254940895}
+  m_Layer: 5
+  m_Name: Background
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &254940894
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 254940893}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1980489563}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &254940895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 254940893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -7443756053782179069, guid: b483c07ae0e1ab04285b19b06e80bd03, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &254940896
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 254940893}
+  m_CullTransparentMesh: 1
 --- !u!1 &473278024
 GameObject:
   m_ObjectHideFlags: 0
@@ -741,8 +820,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -845,7 +924,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 530, y: 672.76886}
+  m_AnchoredPosition: {x: 300, y: 670}
   m_SizeDelta: {x: 600, y: 50}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &640931643
@@ -878,7 +957,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1305,14 +1384,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 0.9433962, g: 0.9433962, b: 0.9433962, a: 0.5882353}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2243,6 +2322,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 254940894}
   - {fileID: 473278025}
   - {fileID: 1133375737}
   - {fileID: 152896827}
@@ -2298,10 +2378,10 @@ MonoBehaviour:
     Automatic: 0
     Value: 0
   mainDivisions:
-    messure: 0
-    unitsPerDivision: 1
-    total: 5
-    material: {fileID: 0}
+    messure: 1
+    unitsPerDivision: 4
+    total: 11
+    material: {fileID: 2100000, guid: 0290bf08b7a37a14f88e4829b1339ab7, type: 2}
     materialTiling:
       EnableTiling: 0
       TileFactor: 100
@@ -2315,7 +2395,7 @@ MonoBehaviour:
       Automatic: 1
       Value: 0.5
     markThickness: 3
-    textPrefab: {fileID: 114000014259531626, guid: 25ea031bfc10c7342ab5bcb344090e13, type: 3}
+    textPrefab: {fileID: 114000014259531626, guid: 68948a5a024a9554389929d60ee952ea, type: 3}
     textPrefix: 
     textSuffix: "\uAC1C"
     fractionDigits: 0
@@ -2342,7 +2422,7 @@ MonoBehaviour:
       Automatic: 1
       Value: 0.5
     markThickness: 3
-    textPrefab: {fileID: 114000014259531626, guid: 25ea031bfc10c7342ab5bcb344090e13, type: 3}
+    textPrefab: {fileID: 114000014259531626, guid: 68948a5a024a9554389929d60ee952ea, type: 3}
     textPrefix: 
     textSuffix: "\uAC1C"
     fractionDigits: 0
@@ -2363,7 +2443,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53bfaf390f2349b4894f21c310d420b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TextPrefab: {fileID: 114000014259531626, guid: 25ea031bfc10c7342ab5bcb344090e13, type: 3}
+  TextPrefab: {fileID: 114000014259531626, guid: 68948a5a024a9554389929d60ee952ea, type: 3}
   FontSize: 20
   TextOffset: {x: -20, y: 0, z: 0}
 --- !u!224 &1259533028458985504
@@ -2471,6 +2551,10 @@ MonoBehaviour:
   pieChartCategories: {fileID: 2543080199582993488}
   pieChartCategoryPrefab: {fileID: 8188109508092053462, guid: f776e2e558a7ef746966bc1233335be1, type: 3}
   baseMaterial: {fileID: 0}
+  periodText: {fileID: 0}
+  hueIncrement: 0.09
+  saturation: 0.4
+  brightness: 0.95
 --- !u!114 &2668333055058635719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2737,7 +2821,7 @@ MonoBehaviour:
     mCategories:
     - Name: "\uAE0D\uC815"
       Materials:
-        Normal: {fileID: 2100000, guid: b082e50e85f316f4aaf0f6104702f4af, type: 2}
+        Normal: {fileID: 2100000, guid: 1a6185b0a5845ed44ae78c6570343ed9, type: 2}
         Hover: {r: 0, g: 0, b: 0, a: 0}
         Selected: {r: 0, g: 0, b: 0, a: 0}
     - Name: "\uBD80\uC815"
@@ -2747,7 +2831,7 @@ MonoBehaviour:
         Selected: {r: 0, g: 0, b: 0, a: 0}
     - Name: "\uC911\uB9BD"
       Materials:
-        Normal: {fileID: 2100000, guid: 17e6c60474da53742b24e6b561e0191d, type: 2}
+        Normal: {fileID: 2100000, guid: d3321f6524ac7df41aebe23ea627c044, type: 2}
         Hover: {r: 0, g: 0, b: 0, a: 0}
         Selected: {r: 0, g: 0, b: 0, a: 0}
     mGroups:
@@ -2835,7 +2919,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 683c1c28d013cce4c9128c952dbdca81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textPrefab: {fileID: 114000014259531626, guid: 25ea031bfc10c7342ab5bcb344090e13, type: 3}
+  textPrefab: {fileID: 114000014259531626, guid: 68948a5a024a9554389929d60ee952ea, type: 3}
   textFormat:
     prefix: 
     suffix: 
@@ -2946,7 +3030,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   meshSegements: 20
-  startAngle: 0
+  startAngle: 90
   angleSpan: 360
   spacingAngle: 0
   radius: 250
