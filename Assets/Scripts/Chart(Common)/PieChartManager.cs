@@ -1,5 +1,6 @@
 ﻿using ChartAndGraph;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PieChartManager : MonoBehaviour
@@ -8,6 +9,7 @@ public class PieChartManager : MonoBehaviour
     [SerializeField] GameObject pieChartCategories;
     [SerializeField] GameObject pieChartCategoryPrefab;
     [SerializeField] Material baseMaterial;
+    [SerializeField] TMP_Text periodText;
     
     struct CategoryInfo
     {
@@ -21,16 +23,19 @@ public class PieChartManager : MonoBehaviour
 
     void Start()
     {
-        if (pieChart != null)
-        {
-            ClearAllCategories();
-            AddCategory("Category A", 32);
-            AddCategory("Category B", 21);
-            AddCategory("Category C", 54);
-        }
+        //if (pieChart != null)
+        //{
+        //    ClearAllCategories();
+        //    AddCategory("Category A", 32);
+        //    AddCategory("Category B", 21);
+        //    AddCategory("Category C", 54);
+        //}
+
+        pieChart.StartAngle = 90f;
+        pieChart.ClockWise = true;
     }
 
-    public void AddCategory(string name, double amount)
+    public void AddCategory(string name, double amount, bool addUIToTop = false)
     {
         // 랜덤 색상 생성
         Color randomColor = Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
@@ -41,6 +46,12 @@ public class PieChartManager : MonoBehaviour
         // UI 카테고리 생성 (텍스트)
         var categoryObj = Instantiate(pieChartCategoryPrefab, pieChartCategories.transform);
         var category = categoryObj.GetComponent<PieChartCategory>();
+        
+        // UI를 맨 위에 추가할지 여부
+        if (addUIToTop)
+        {
+            categoryObj.transform.SetAsFirstSibling();
+        }
         
         // 카테고리 정보 저장
         CategoryInfo info = new CategoryInfo
@@ -160,5 +171,11 @@ public class PieChartManager : MonoBehaviour
         
         newMat.color = color;
         return newMat;
+    }
+
+    public void UpdatePeriod(string text)
+    {
+        if (periodText != null)
+            periodText.text = text;
     }
 }
