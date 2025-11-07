@@ -1,7 +1,8 @@
-﻿using TMPro;
+﻿using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Text.RegularExpressions;
 
 public class SearchInputField : MonoBehaviour
 {
@@ -54,7 +55,9 @@ public class SearchInputField : MonoBehaviour
     void OnLinkSearch(string link)
     {
         Debug.Log($"링크로 검색 시작: {link}");
-        Instantiate(loadingPrefab, loadingCanvas.transform);
+        var loading = Instantiate(loadingPrefab, loadingCanvas.transform).GetComponent<LoadingScreen>();
+        loading.isLinkSearch = true;
+        loading.text = link;
         DontDestroyOnLoad(loadingCanvas);
         
         // TODO: Python 스크립트 실행 (--url 파라미터 사용)
@@ -67,7 +70,9 @@ public class SearchInputField : MonoBehaviour
     void OnKeywordSearch(string keyword)
     {
         Debug.Log($"키워드로 검색 시작: {keyword}");
-        Instantiate(loadingPrefab, loadingCanvas.transform);
+        var loading = Instantiate(loadingPrefab, loadingCanvas.transform).GetComponent<LoadingScreen>();
+        loading.isLinkSearch = false;
+        loading.text = keyword;
         DontDestroyOnLoad(loadingCanvas);
         
         // TODO: Python 스크립트 실행 (--text 파라미터 사용)
