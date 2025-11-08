@@ -12,6 +12,7 @@ import time
 import re
 import argparse
 import sys
+import os
 
 # ===========================================
 # [1] API 설정
@@ -112,6 +113,32 @@ def get_published_after(period_type, amount):
 # ===========================================
 # [6] 키워드 검색 후 영상/댓글 수집
 # ===========================================
+def get_video_info_basic(video_id):
+    try:
+        video_response = youtube.videos().list(
+            part="snippet,statistics",
+            id=video_id
+        ).execute()
+
+        if not video_response["items"]:
+            return None
+
+        item = video_response["items"][0]
+        snippet = item["snippet"]
+        stats = item.get("statistics", {})
+
+        return {
+            "video_title": snippet["title"],
+            "video_link": f"https://www.youtube.com/watch?v={video_id}",
+            "views": stats.get("viewCount", "0"),
+            "likes": stats.get("likeCount", "0"),
+            "published_at": snippet["publishedAt"],
+            "thumbnail": snippet["thumbnails"]["high"]["url"],
+        }
+    except Exception:
+        return None
+
+
 def search_videos_with_comments(keyword, published_after=None, max_results=50):
     search_response = youtube.search().list(
         q=keyword,
@@ -128,28 +155,61 @@ def search_videos_with_comments(keyword, published_after=None, max_results=50):
             results.append(info)
     return results
 
+
+def search_videos_basic(keyword, published_after=None, max_results=50):
+    search_response = youtube.search().list(
+        q=keyword,
+        part="snippet",
+        type="video",
+        maxResults=max_results,
+        publishedAfter=published_after
+    ).execute()
+    results = []
+    for item in search_response["items"]:
+        video_id = item["id"]["videoId"]
+        info = get_video_info_basic(video_id)
+        if info:
+            results.append(info)
+    return results
+
 # ===========================================
 # [7] CSV 저장
 # ===========================================
+if getattr(sys, "frozen", False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
 def display_and_save_results(results, filename):
-    data_rows, comment_count = [], 0
-    for r in results:
-        for c in r["comments"]:
-            comment_count += 1
-            data_rows.append({
-                "video_title": r["title"],
-                "video_link": r["link"],
-                "views": r["views"],
-                "likes": r["likes"],
-                "published_at": r["published_at"],
-                "thumbnail": r["thumbnail"],
-                "comment_author": c["author"],
-                "comment_text": c["text"],
-                "comment_likes": c["like_count"],
-                "comment_published": c["published"]
-            })
-    pd.DataFrame(data_rows).to_csv(filename, index=False, encoding="utf-8-sig")
-    print(f"영상 {len(results)}개, 댓글 {comment_count}개 저장 완료 → {filename}")
+    filepath = os.path.join(BASE_DIR, filename)
+    if not results:
+        pd.DataFrame().to_csv(filepath, index=False, encoding="utf-8-sig")
+        print(f"저장할 결과가 없습니다 → {filepath}")
+        return
+
+    if "comments" in results[0]:
+        data_rows, comment_count = [], 0
+        for r in results:
+            for c in r["comments"]:
+                comment_count += 1
+                data_rows.append({
+                    "video_title": r["title"],
+                    "video_link": r["link"],
+                    "views": r["views"],
+                    "likes": r["likes"],
+                    "published_at": r["published_at"],
+                    "thumbnail": r["thumbnail"],
+                    "comment_author": c["author"],
+                    "comment_text": c["text"],
+                    "comment_likes": c["like_count"],
+                    "comment_published": c["published"]
+                })
+        pd.DataFrame(data_rows).to_csv(filepath, index=False, encoding="utf-8-sig")
+        print(f"영상 {len(results)}개, 댓글 {comment_count}개 저장 완료 → {filepath}")
+    else:
+        pd.DataFrame(results).to_csv(filepath, index=False, encoding="utf-8-sig")
+        print(f"영상 {len(results)}개 저장 완료 → {filepath}")
 
 # ===========================================
 # [8] main
@@ -178,7 +238,7 @@ def main():
             print("키워드 검색에는 --period_type 과 --amount 인자가 필요합니다.")
             return
         published_after = get_published_after(args.period_type, args.amount)
-        results = search_videos_with_comments(args.text, published_after=published_after)
+        results = search_videos_basic(args.text, published_after=published_after)
         display_and_save_results(results, "youtube_keyword_results.csv")
 
     else:

@@ -71,8 +71,6 @@ public class YoutubeScrollViewController : MonoBehaviour
             ? Mathf.Min(maxDisplayCount, currentVideos.Count) 
             : currentVideos.Count;
 
-        Debug.Log($"{displayCount}개의 비디오를 표시합니다.");
-
         // UI 아이템 생성
         for (int i = 0; i < displayCount; i++)
         {

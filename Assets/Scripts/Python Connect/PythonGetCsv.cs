@@ -1,79 +1,315 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Text;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 public static class PythonGetCsv
 {
-    // 빌드 폴더/<앱 exe 옆>/Tools/Analyze.exe 가정
-    static string pythonPackedExe =>
-        Path.Combine(Path.GetDirectoryName(Application.dataPath)!, "Tools", "Analyze.exe");
+    public static readonly string ToolsDirectory = Path.Combine(Path.GetDirectoryName(Application.dataPath)!, "Tools");
 
-    // inputText를 주면 STDIN으로 전달, 안 주면 입력 없이 실행
-    public static void RunAndRead(string inputText = null)
+    public static string analyzeDir = Path.Combine(ToolsDirectory, "Analyze");
+    static string analyzeExe => Path.Combine(analyzeDir, "Analyze.exe");
+    
+    public static readonly string youtubeCollectorDir = Path.Combine(ToolsDirectory, "YoutubeCollector");
+    static string youtubeCollectorExe => Path.Combine(youtubeCollectorDir, "YoutubeCollector.exe");
+
+    public static IEnumerator RunYoutubeCollectorCoroutine(string searchText, bool isLinkSearch,
+        Action<float> onProgress = null, Action<string> onOutput = null, Action<string> onError = null)
     {
-        // 1) 출력 경로(플랫폼 안전) + 폴더 보장
-        string outCsv = Path.Combine(Application.persistentDataPath, "result.csv");
-        Directory.CreateDirectory(Path.GetDirectoryName(outCsv)!);
-
-        // 이전 결과 csv를 지우고 시작
-        if (File.Exists(outCsv))
-            File.Delete(outCsv);
-
-        // 2) exe 존재 확인
-        if (!File.Exists(pythonPackedExe))
+        if (string.IsNullOrEmpty(searchText))
         {
-            Debug.LogError($"Python exe not found: {pythonPackedExe}");
-            return;
+            Debug.LogError("searchText가 비어 있습니다.");
+            yield break;
         }
 
-        // 3) 프로세스 설정: OUTPUT_CSV 환경변수로 출력 경로 전달
-        var psi = new ProcessStartInfo
+        if (!File.Exists(youtubeCollectorExe))
         {
-            FileName = pythonPackedExe,
+            Debug.LogError($"YoutubeCollector.exe not found: {youtubeCollectorExe}");
+            yield break;
+        }
+
+        string resultFile = Path.Combine(
+            youtubeCollectorDir,
+            isLinkSearch ? "youtube_link_results.csv" : "youtube_keyword_results.csv"
+        );
+
+        if (File.Exists(resultFile))
+        {
+            try
+            {
+                File.Delete(resultFile);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"파일 삭제 실패: {e.Message}");
+                yield break;
+            }
+        }
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = youtubeCollectorExe,
+            Arguments = isLinkSearch
+                ? $"--url \"{searchText}\""
+                : $"--text \"{searchText}\" --period_type \"month\" --amount 1",
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            RedirectStandardInput = (inputText != null), // 입력이 있을 때만
-            WorkingDirectory = Application.persistentDataPath,
+            WorkingDirectory = ToolsDirectory
         };
-        psi.Environment["OUTPUT_CSV"] = outCsv;
+
+        string tempPath = Path.Combine(ToolsDirectory, "Temp");
+        if (!Directory.Exists(tempPath))
+        {
+            Directory.CreateDirectory(tempPath);
+        }
+
+        startInfo.EnvironmentVariables["TEMP"] = tempPath;
+        startInfo.EnvironmentVariables["TMP"] = tempPath;
+        startInfo.EnvironmentVariables["_MEIPASS2"] = tempPath;
+        startInfo.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8";
+
+        using var process = Process.Start(startInfo);
+        if (process == null)
+        {
+            Debug.LogError("Failed to start YoutubeCollector process.");
+            yield break;
+        }
+
+        var stdoutQueue = new ConcurrentQueue<string>();
+        var stderrQueue = new ConcurrentQueue<string>();
+
+        process.OutputDataReceived += (_, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+                stdoutQueue.Enqueue(e.Data);
+        };
+        process.ErrorDataReceived += (_, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+                stderrQueue.Enqueue(e.Data);
+        };
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+
+        while (!process.HasExited)
+        {
+            DrainQueues(stdoutQueue, onOutput, onProgress);
+            DrainQueues(stderrQueue, onError, onProgress);
+            yield return null;
+        }
+
+        process.WaitForExit();
+
+        DrainQueues(stdoutQueue, onOutput, onProgress);
+        DrainQueues(stderrQueue, onError, onProgress);
+
+        if (onProgress != null)
+        {
+            onProgress(1f);
+        }
+
+        if (process.ExitCode != 0)
+        {
+            Debug.LogError($"YoutubeCollector 실패. ExitCode: {process.ExitCode}");
+        }
+    }
+
+    static void DrainQueues(ConcurrentQueue<string> queue, Action<string> callback, Action<float> onProgress)
+    {
+        while (queue.TryDequeue(out var line))
+        {
+            callback?.Invoke(line);
+            if (onProgress != null && TryExtractProgress(line, out var progress))
+            {
+                onProgress(progress);
+            }
+        }
+    }
+
+    public static IEnumerator RunAnalyzeCoroutine(
+        string inputCsv,
+        string outputCsv = null,
+        bool disableNer = false,
+        string sentimentModel = null,
+        float? neutralThreshold = null,
+        int? minLen = null,
+        int? topn = null,
+        Action<string> onOutput = null,
+        Action<string> onError = null,
+        Action<float> onProgress = null)
+    {
+        if (string.IsNullOrEmpty(inputCsv))
+        {
+            Debug.LogError("inputCsv 경로가 비어 있습니다.");
+            yield break;
+        }
+
+        if (!File.Exists(analyzeExe))
+        {
+            Debug.LogError($"Python exe not found: {analyzeExe}");
+            yield break;
+        }
+
+        string baseArg = $"--input \"{inputCsv}\"";
+        if (!string.IsNullOrEmpty(outputCsv))
+        {
+            baseArg += $" --output \"{outputCsv}\"";
+        }
+        if (disableNer)
+        {
+            baseArg += " --disable_ner";
+        }
+        if (!string.IsNullOrEmpty(sentimentModel))
+        {
+            baseArg += $" --sentiment_model \"{sentimentModel}\"";
+        }
+        if (neutralThreshold.HasValue)
+        {
+            baseArg += $" --neutral_threshold {neutralThreshold.Value.ToString(CultureInfo.InvariantCulture)}";
+        }
+        if (minLen.HasValue)
+        {
+            baseArg += $" --min_len {minLen.Value}";
+        }
+        if (topn.HasValue)
+        {
+            baseArg += $" --topn {topn.Value}";
+        }
+
+        var psi = new ProcessStartInfo
+        {
+            FileName = analyzeExe,
+            Arguments = baseArg,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            WorkingDirectory = analyzeDir,
+        };
         psi.Environment["PYTHONIOENCODING"] = "utf-8";
+        psi.Environment["PYTHONUTF8"] = "1";
+        psi.StandardOutputEncoding = Encoding.UTF8;
+        psi.StandardErrorEncoding = Encoding.UTF8;
 
-        try
+        using var p = Process.Start(psi);
+        if (p == null)
         {
-            using var p = Process.Start(psi);
-            if (p == null) { Debug.LogError("Failed to start process."); return; }
-
-            if (inputText != null)
-            {
-                p.StandardInput.Write(inputText);
-                p.StandardInput.Close(); // EOF 전달
-            }
-
-            string stdout = p.StandardOutput.ReadToEnd();
-            string stderr = p.StandardError.ReadToEnd();
-            p.WaitForExit();
-
-            if (!string.IsNullOrEmpty(stdout)) Debug.Log($"py out:\n{stdout}");
-            if (!string.IsNullOrEmpty(stderr)) Debug.LogWarning($"py err:\n{stderr}");
-
-            // 4) 결과 읽기
-            if (File.Exists(outCsv))
-            {
-                string raw = File.ReadAllText(outCsv);
-                Debug.Log($"CSV @ {outCsv}\n{raw}");
-            }
-            else
-            {
-                Debug.LogError($"CSV not found: {outCsv}");
-            }
+            Debug.LogError("Failed to start process.");
+            yield break;
         }
-        catch (Exception e)
+
+        var stdoutQueue = new ConcurrentQueue<string>();
+        var stderrQueue = new ConcurrentQueue<string>();
+
+        p.OutputDataReceived += (_, e) =>
         {
-            Debug.LogError(e);
+            if (!string.IsNullOrEmpty(e.Data))
+                stdoutQueue.Enqueue(e.Data);
+        };
+        p.ErrorDataReceived += (_, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+                stderrQueue.Enqueue(e.Data);
+        };
+        p.BeginOutputReadLine();
+        p.BeginErrorReadLine();
+
+        bool TryDrainStdOut(ConcurrentQueue<string> queue, Action<string> callback)
+        {
+            var invoked = false;
+            while (queue.TryDequeue(out var line))
+            {
+                invoked = true;
+                callback?.Invoke(line);
+                if (callback == onOutput && onProgress != null && TryExtractProgress(line, out var progress))
+                {
+                    onProgress(progress);
+                }
+            }
+
+            return invoked;
         }
+
+        bool TryDrainStdErr(ConcurrentQueue<string> queue, Action<string> callback)
+        {
+            var invoked = false;
+            while (queue.TryDequeue(out var line))
+            {
+                if (LooksLikeProgressLine(line))
+                {
+                    onOutput?.Invoke(line);
+                    if (onProgress != null && TryExtractProgress(line, out var progress))
+                    {
+                        onProgress(progress);
+                    }
+                    continue;
+                }
+
+                invoked = true;
+                callback?.Invoke(line);
+            }
+
+            return invoked;
+        }
+
+        while (!p.HasExited)
+        {
+            TryDrainStdOut(stdoutQueue, onOutput);
+            TryDrainStdErr(stderrQueue, onError);
+            yield return null;
+        }
+
+        p.WaitForExit();
+
+        TryDrainStdOut(stdoutQueue, onOutput);
+        TryDrainStdErr(stderrQueue, onError);
+
+        if (onProgress != null)
+        {
+            onProgress(1f);
+        }
+
+        Debug.Log($"[Analyze] 종료 코드: {p.ExitCode}");
+    }
+
+    static bool TryExtractProgress(string line, out float progress)
+    {
+        progress = 0f;
+        if (string.IsNullOrEmpty(line))
+            return false;
+
+        int percentIndex = line.IndexOf('%');
+        if (percentIndex <= 0)
+            return false;
+
+        int start = percentIndex - 1;
+        while (start >= 0 && (char.IsDigit(line[start]) || line[start] == '.' || line[start] == ','))
+        {
+            start--;
+        }
+        start++;
+        var numberStr = line.Substring(start, percentIndex - start).Replace(',', '.');
+        if (float.TryParse(numberStr, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+        {
+            progress = Mathf.Clamp01(value / 100f);
+            return true;
+        }
+
+        return false;
+    }
+
+    static bool LooksLikeProgressLine(string line)
+    {
+        if (string.IsNullOrEmpty(line))
+            return false;
+
+        return line.Contains("%|") && line.Contains("|");
     }
 }

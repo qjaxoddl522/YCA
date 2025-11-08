@@ -54,14 +54,10 @@ public class SearchInputField : MonoBehaviour
     /// </summary>
     void OnLinkSearch(string link)
     {
-        Debug.Log($"링크로 검색 시작: {link}");
         var loading = Instantiate(loadingPrefab, loadingCanvas.transform).GetComponent<LoadingScreen>();
         loading.isLinkSearch = true;
         loading.text = link;
         DontDestroyOnLoad(loadingCanvas);
-        
-        // TODO: Python 스크립트 실행 (--url 파라미터 사용)
-        // 예: YoutubeCollector.exe --url "{link}"
     }
 
     /// <summary>
@@ -69,13 +65,9 @@ public class SearchInputField : MonoBehaviour
     /// </summary>
     void OnKeywordSearch(string keyword)
     {
-        Debug.Log($"키워드로 검색 시작: {keyword}");
         var loading = Instantiate(loadingPrefab, loadingCanvas.transform).GetComponent<LoadingScreen>();
         loading.isLinkSearch = false;
         loading.text = keyword;
         DontDestroyOnLoad(loadingCanvas);
-        
-        // TODO: Python 스크립트 실행 (--text 파라미터 사용)
-        // 예: YoutubeCollector.exe --text "{keyword}" --period_type "month" --amount 1
     }
 }

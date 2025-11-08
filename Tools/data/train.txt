@@ -1,0 +1,13 @@
+삼성  B-ORG
+전자  I-ORG
+는    O
+서울  B-LOC
+에    O
+본사  O
+가    O
+있다  O
+
+LG    B-ORG
+화학  I-ORG
+도    O
+있다  O

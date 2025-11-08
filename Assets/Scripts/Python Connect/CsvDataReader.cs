@@ -92,20 +92,20 @@ public static class CsvDataReader
 
     public static LinkResult ReadLinkResultCsv()
     {
-        var path = Path.Combine(Application.persistentDataPath, "analyzed_comments.csv");
-        if (!File.Exists(path)) 
+        var filePath = Path.Combine(PythonGetCsv.analyzeDir, "analyzed_comments.csv");
+        if (!File.Exists(filePath))
         { 
-            Debug.LogError("CSV 없음: " + path); 
+            Debug.LogError("CSV 없음: " + filePath); 
             return new LinkResult(); 
         }
 
-        Debug.Log($"CSV 읽기: {path}");
+        Debug.Log($"CSV 읽기: {filePath}");
 
         var result = new LinkResult();
 
         try
         {
-            using (StreamReader reader = new StreamReader(path))
+            using (StreamReader reader = new StreamReader(filePath))
             {
                 // 헤더 라인 읽기
                 string headerLine = reader.ReadLine();
@@ -195,7 +195,7 @@ public static class CsvDataReader
         List<YoutubeVideoData> videoList = new List<YoutubeVideoData>();
         HashSet<string> processedLinks = new HashSet<string>(); // 중복 제거용
 
-        string filePath = Path.Combine(Application.persistentDataPath, "youtube_keyword_results.csv");
+        string filePath = Path.Combine(PythonGetCsv.youtubeCollectorDir, "youtube_keyword_results.csv");
 
         if (!File.Exists(filePath))
         {
@@ -280,6 +280,145 @@ public static class CsvDataReader
         }
 
         return videoList;
+    }
+
+    /// <summary>
+    /// 링크 검색 결과 CSV에서 첫 번째 비디오 정보를 읽습니다.
+    /// </summary>
+    public static bool TryReadLinkPrimaryVideo(out YoutubeVideoData videoData)
+    {
+        videoData = null;
+        string filePath = Path.Combine(PythonGetCsv.youtubeCollectorDir, "youtube_link_results.csv");
+        if (!File.Exists(filePath))
+        {
+            Debug.LogWarning($"링크 CSV 파일을 찾을 수 없습니다: {filePath}");
+            return false;
+        }
+
+        try
+        {
+            using (StreamReader reader = new StreamReader(filePath))
+            {
+                string headerLine = reader.ReadLine();
+                if (string.IsNullOrWhiteSpace(headerLine))
+                {
+                    Debug.LogWarning("링크 CSV 헤더가 비어있습니다.");
+                    return false;
+                }
+
+                string[] headers = ParseCSVLine(headerLine);
+                int titleIdx = Array.IndexOf(headers, "video_title");
+                int linkIdx = Array.IndexOf(headers, "video_link");
+                int viewsIdx = Array.IndexOf(headers, "views");
+                int thumbnailIdx = Array.IndexOf(headers, "thumbnail");
+
+                if (titleIdx < 0 || linkIdx < 0 || viewsIdx < 0 || thumbnailIdx < 0)
+                {
+                    Debug.LogWarning("링크 CSV에서 필수 컬럼을 찾을 수 없습니다.");
+                    return false;
+                }
+
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
+
+                    string[] values = ParseCSVLine(line);
+                    if (values.Length <= Mathf.Max(titleIdx, linkIdx, viewsIdx, thumbnailIdx))
+                        continue;
+
+                    string videoTitle = titleIdx < values.Length ? values[titleIdx] : "";
+                    string videoLink = linkIdx < values.Length ? values[linkIdx] : "";
+                    string viewsStr = viewsIdx < values.Length ? values[viewsIdx] : "0";
+                    string thumbnailUrl = thumbnailIdx < values.Length ? values[thumbnailIdx] : "";
+
+                    videoTitle = RemoveUnsupportedCharacters(videoTitle);
+                    videoTitle = TruncateTitle(videoTitle, MaxTitleLength);
+
+                    int views = 0;
+                    int.TryParse(viewsStr, out views);
+
+                    videoData = new YoutubeVideoData(videoTitle, videoLink, thumbnailUrl, views);
+                    return true;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"링크 CSV 읽기 중 오류 발생: {e.Message}");
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// analyzed_keywords.csv에서 키워드별 총 합계를 읽어옵니다.
+    /// </summary>
+    public static Dictionary<string, int> ReadKeywordSummaryCsv()
+    {
+        var keywordTotals = new Dictionary<string, int>();
+        string filePath = Path.Combine(PythonGetCsv.analyzeDir, "analyzed_keywords.csv");
+
+        if (!File.Exists(filePath))
+        {
+            Debug.LogWarning($"키워드 CSV 파일을 찾을 수 없습니다: {filePath}");
+            return keywordTotals;
+        }
+
+        try
+        {
+            using (var reader = new StreamReader(filePath))
+            {
+                string headerLine = reader.ReadLine();
+                if (string.IsNullOrWhiteSpace(headerLine))
+                {
+                    Debug.LogWarning("키워드 CSV 헤더가 비어있습니다.");
+                    return keywordTotals;
+                }
+
+                string[] headers = ParseCSVLine(headerLine);
+                int keywordIdx = Array.IndexOf(headers, "keyword");
+                int countIdx = Array.IndexOf(headers, "count");
+
+                if (keywordIdx < 0 || countIdx < 0)
+                {
+                    Debug.LogWarning("키워드 CSV에서 필수 컬럼을 찾을 수 없습니다.");
+                    return keywordTotals;
+                }
+
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
+
+                    string[] values = ParseCSVLine(line);
+                    if (values.Length <= Mathf.Max(keywordIdx, countIdx))
+                        continue;
+
+                    string keyword = keywordIdx < values.Length ? values[keywordIdx].Trim() : string.Empty;
+                    string countStr = countIdx < values.Length ? values[countIdx] : "0";
+
+                    if (string.IsNullOrEmpty(keyword))
+                        continue;
+
+                    if (!int.TryParse(countStr, out int count))
+                        count = 0;
+
+                    if (keywordTotals.ContainsKey(keyword))
+                        keywordTotals[keyword] += count;
+                    else
+                        keywordTotals[keyword] = count;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"키워드 CSV 읽기 중 오류 발생: {e.Message}");
+        }
+
+        return keywordTotals;
     }
 
     /// <summary>

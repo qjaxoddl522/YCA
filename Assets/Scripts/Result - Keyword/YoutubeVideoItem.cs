@@ -205,7 +205,7 @@ public class YoutubeVideoItem : MonoBehaviour
         itemButtonImage.color = selectedColor;
         selectArea.SetActive(true);
 
-        contentController.ShowVideoSelectedContent(title.text);
+        contentController.ShowVideoSelectedContent(title.text, videoData?.link);
     }
 
     public void SetDeselected()

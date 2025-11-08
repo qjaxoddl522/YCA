@@ -1,10 +1,12 @@
 ﻿using ChartAndGraph;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 
 public class LinkContentManager : MonoBehaviour
 {
@@ -26,7 +28,7 @@ public class LinkContentManager : MonoBehaviour
         LoadLinkData();
     }
 
-    private void LoadLinkData()
+    public void LoadLinkData()
     {
         // CSV에서 LinkResult 읽기
         LinkResult result = CsvDataReader.ReadLinkResultCsv();
@@ -38,8 +40,8 @@ public class LinkContentManager : MonoBehaviour
         }
 
         int dataCount = result.dataEntries.Count;
-        // 차트 개수 계산: 최소 2개, 50개마다 +1개, 최대 5개
-        int chartCount = Mathf.Clamp(2 + dataCount / 50, 2, 5);
+        // 차트 개수 계산: 최소 2개, 100개마다 +1개, 최대 5개
+        int chartCount = Mathf.Clamp(2 + dataCount / 100, 2, 5);
 
         Debug.Log($"총 댓글 수: {dataCount}, 생성할 차트 수: {chartCount}");
 
@@ -67,6 +69,45 @@ public class LinkContentManager : MonoBehaviour
 
         // 데이터를 차트에 분배
         DistributeDataToCharts(result.dataEntries, chartCount);
+    }
+
+    public void ApplyPrimaryVideo(YoutubeVideoData videoData)
+    {
+        if (videoData == null)
+            return;
+
+        if (title != null)
+        {
+            title.text = videoData.title ?? string.Empty;
+        }
+
+        if (thumbnail != null && !string.IsNullOrEmpty(videoData.thumbnailUrl))
+        {
+            StartCoroutine(LoadThumbnailRoutine(thumbnail, videoData.thumbnailUrl));
+        }
+    }
+
+    IEnumerator LoadThumbnailRoutine(Image target, string url)
+    {
+        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Texture2D texture = DownloadHandlerTexture.GetContent(request);
+                Sprite sprite = Sprite.Create(
+                    texture,
+                    new Rect(0, 0, texture.width, texture.height),
+                    new Vector2(0.5f, 0.5f)
+                );
+                target.sprite = sprite;
+            }
+            else
+            {
+                Debug.LogWarning($"링크 썸네일 로드 실패: {url}\n{request.error}");
+            }
+        }
     }
 
     /// <summary>
