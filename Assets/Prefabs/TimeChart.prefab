@@ -475,7 +475,7 @@ MonoBehaviour:
     automaticMinValue: 0
     minValue: 0
   transitionTimeBetaFeature: -1
-  heightRatio: 212.1
+  heightRatio: 220
   totalWidth: 163
   totalDepth: 0
   fitToContainer: 0
@@ -537,7 +537,7 @@ MonoBehaviour:
     Value: 0
   mainDivisions:
     messure: 0
-    unitsPerDivision: 1
+    unitsPerDivision: 5
     total: 5
     material: {fileID: 2100000, guid: 0290bf08b7a37a14f88e4829b1339ab7, type: 2}
     materialTiling:
@@ -555,7 +555,7 @@ MonoBehaviour:
     markThickness: 3
     textPrefab: {fileID: 114000014259531626, guid: 68948a5a024a9554389929d60ee952ea, type: 3}
     textPrefix: 
-    textSuffix: "\uAC1C"
+    textSuffix: 
     fractionDigits: 0
     fontSize: 12
     fontSharpness: 3
@@ -582,7 +582,7 @@ MonoBehaviour:
     markThickness: 3
     textPrefab: {fileID: 114000014259531626, guid: 68948a5a024a9554389929d60ee952ea, type: 3}
     textPrefix: 
-    textSuffix: "\uAC1C"
+    textSuffix: 
     fractionDigits: 0
     fontSize: 12
     fontSharpness: 3

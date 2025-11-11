@@ -44,8 +44,10 @@ public class StanseBarChartManager : MonoBehaviour
         // 커스텀 division 초기화
         barChart.ClearVerticalCustomDivisions();
 
-        // 10개 단위로 간격 늘리기
-        int interval = Mathf.Max(1, Mathf.CeilToInt(maxValue / 10f));
+        // 기본 5개 단위, 30개를 초과할 때마다 5씩 증가
+        int intervalStep = Mathf.FloorToInt(Mathf.Max(0, maxValue - 1) / 30f);
+        int interval = 5 + (intervalStep * 5);
+
         verticalAxis.MainDivisions.Total = 0;
         verticalAxis.MainDivisions.Messure = ChartDivisionInfo.DivisionMessure.DataUnits;
         verticalAxis.MainDivisions.UnitsPerDivision = interval;

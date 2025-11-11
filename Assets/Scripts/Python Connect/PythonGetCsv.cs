@@ -145,6 +145,7 @@ public static class PythonGetCsv
         Action<string> onError = null,
         Action<float> onProgress = null)
     {
+        yield break;
         if (string.IsNullOrEmpty(inputCsv))
         {
             Debug.LogError("inputCsv 경로가 비어 있습니다.");
